@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carnes Guerra | Catálogo Online & Pedidos</title>
+    <meta name="theme-color" content="#18181b">
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <style>
+        html{-webkit-text-size-adjust:100%}
+        input,select,textarea{font-size:16px!important}
+        #cartBar{padding-bottom:calc(1rem + env(safe-area-inset-bottom,0px))}
+        #checkoutModal>div{max-height:92vh;overflow-y:auto}
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+        input[type=number]{appearance:textfield;-moz-appearance:textfield}
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans pb-36">
+
+    <!-- Header / Banner -->
+    <header class="bg-zinc-900 text-white shadow-md sm:sticky sm:top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-700 p-2.5 rounded-xl text-white font-bold text-xl">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black tracking-wider leading-none">CARNES GUERRA</h1>
+                        <p class="text-[11px] text-gray-300 font-medium mt-1">
+                            <i class="fa-solid fa-location-dot text-red-500 mr-1"></i>Dr. Ortega Oeste 1340 (Entre Rivadavia y Magallanes)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selector de Modalidad: Retiro vs Delivery -->
+            <div class="grid grid-cols-2 bg-zinc-800 p-1 rounded-xl border border-zinc-700 w-full sm:w-auto gap-1">
+                <button type="button" id="btnModeRetiro" onclick="setDeliveryMode('retiro')" 
+                    class="px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-red-600 text-white shadow">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Retiro en Local</span>
+                </button>
+                <button type="button" id="btnModeDelivery" onclick="setDeliveryMode('delivery')" 
+                    class="px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-gray-300 hover:text-white">
+                    <i class="fa-solid fa-motorcycle"></i>
+                    <span>Delivery / Envío</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-5">
+
+        <!-- Buscador y Filtros -->
+        <div class="mb-6 space-y-3.5">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                <input type="text" id="searchInput" placeholder="Buscar en todo el catálogo (ej: supremas, blanda, aceite, coca)..." 
+                    class="w-full bg-white pl-11 pr-10 py-3 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3.5 top-3 text-gray-400 hover:text-gray-700 font-bold text-lg leading-none">&times;</button>
+            </div>
+
+            <!-- Categorías distribuidas en filas visibles (sin scroll oculto ni flechas) -->
+            <div id="catContainer" class="flex flex-wrap gap-1.5 sm:gap-2">
+                <button onclick="filterCategory('todos', this)" data-cat="todos" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">Todos</button>
+                <button onclick="filterCategory('Ofertas', this)" data-cat="Ofertas" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🔥 Ofertas</button>
+                <button onclick="filterCategory('Promos', this)" data-cat="Promos" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">⭐ Promos</button>
+                <button onclick="filterCategory('Vacunos', this)" data-cat="Vacunos" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🥩 Vacunos</button>
+                <button onclick="filterCategory('Cerdo', this)" data-cat="Cerdo" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🐖 Cerdo</button>
+                <button onclick="filterCategory('Pollo', this)" data-cat="Pollo" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🍗 Pollo</button>
+                <button onclick="filterCategory('Achuras', this)" data-cat="Achuras" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🔥 Achuras</button>
+                <button onclick="filterCategory('Fiambres', this)" data-cat="Fiambres" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🧀 Fiambres</button>
+                <button onclick="filterCategory('Frescos', this)" data-cat="Frescos" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🥚 Frescos y Huevos</button>
+                <button onclick="filterCategory('Lacteos', this)" data-cat="Lacteos" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🥛 Lácteos y Manteca</button>
+                <button onclick="filterCategory('Pastas', this)" data-cat="Pastas" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🍝 Pastas</button>
+                <button onclick="filterCategory('Aderezos', this)" data-cat="Aderezos" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🥫 Aderezos y Salsas</button>
+                <button onclick="filterCategory('Almacen', this)" data-cat="Almacen" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🛒 Almacén</button>
+                <button onclick="filterCategory('Bebidas', this)" data-cat="Bebidas" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🥤 Bebidas</button>
+                <button onclick="filterCategory('Limpieza', this)" data-cat="Limpieza" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🧼 Limpieza</button>
+                <button onclick="filterCategory('Leña', this)" data-cat="Leña" class="cat-btn text-xs px-3.5 py-2 rounded-full transition-all">🪵 Leña</button>
+            </div>
+        </div>
+
+        <!-- Grilla de Productos -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Inyectado por JS -->
+        </div>
+    </main>
+
+    <!-- Carrito Flotante / Footer Bar -->
+    <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 transform translate-y-full transition-transform duration-300 z-50">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+            <div>
+                <p class="text-xs text-gray-500 font-medium">Tu pedido (<span id="cartCount">0</span> ítems)</p>
+                <p id="cartTotalBar" class="text-lg font-black text-zinc-900">$0</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="clearCart()" title="Vaciar carrito" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold p-3 rounded-xl text-sm transition-colors">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button onclick="openCheckout()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-5 rounded-xl shadow-lg flex items-center space-x-2 text-sm transition-all transform active:scale-95">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Finalizar Pedido</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-black text-lg text-zinc-900">Confirmar y Enviar Pedido</h3>
+                <button onclick="closeCheckout()" class="text-gray-400 hover:text-gray-600 font-bold text-2xl leading-none">&times;</button>
+            </div>
+
+            <!-- Lista de productos en el carrito -->
+            <div id="cartItemsList" class="divide-y divide-gray-100 max-h-44 overflow-y-auto pr-1"></div>
+
+            <!-- Total Estimado y aclaración de balanza -->
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-gray-700 uppercase">Total Estimado:</span>
+                    <span id="modalTotal" class="text-base font-black text-red-600">$0</span>
+                </div>
+                <p id="weighableWarning" class="text-[11px] text-amber-800 font-medium hidden">
+                    <i class="fa-solid fa-scale-balanced mr-1"></i>El importe final de los cortes se confirma con el ticket de balanza.
+                </p>
+            </div>
+
+            <!-- Selector de Modalidad dentro del Modal -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-gray-700">1. ¿Cómo recibís tu pedido?</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="modalBtnRetiro" onclick="setDeliveryMode('retiro')"
+                        class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-store"></i> Retiro en Local
+                    </button>
+                    <button type="button" id="modalBtnDelivery" onclick="setDeliveryMode('delivery')"
+                        class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-motorcycle"></i> Delivery
+                    </button>
+                </div>
+                <p id="retiroInfoText" class="text-[11px] text-gray-500 pl-1">
+                    📍 Retirás en <strong>Dr. Ortega Oeste 1340</strong> (Entre Rivadavia y Magallanes).
+                </p>
+            </div>
+
+            <!-- Datos del Cliente -->
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">2. Tu Nombre y Apellido: *</label>
+                    <input type="text" id="clientName" placeholder="Ej: Juan Pérez" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+
+                <!-- Campo Dirección (Solo visible en Delivery) -->
+                <div id="deliveryAddressBox" class="hidden">
+                    <label class="block text-xs font-bold text-red-700 mb-1">Dirección exacta para el Delivery (Calle, N° y Barrio): *</label>
+                    <input type="text" id="clientAddress" placeholder="Ej: Calle Comandante Cabot 1540 Oeste, Barrio..." class="w-full bg-red-50/40 border border-red-300 p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+
+                <!-- Medio de Pago para compromiso -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">3. Medio de Pago: *</label>
+                    <select id="paymentMethod" onchange="togglePaymentInfo()" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer">
+                        <option value="Mercado Pago / Transferencia">💳 Mercado Pago / Transferencia Bancaria</option>
+                        <option value="Efectivo">💵 Efectivo (Al retirar / Al recibir)</option>
+                        <option value="Tarjeta Débito / Crédito en local">💳 Tarjeta en el local</option>
+                    </select>
+                </div>
+
+                <!-- Aviso de Compromiso de Pedido -->
+                <div id="mpCommitmentBox" class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-[11px] text-blue-900 space-y-1">
+                    <p class="font-bold"><i class="fa-solid fa-shield-halved mr-1"></i>Compromiso de preparación:</p>
+                    <p>Al enviar el pedido por WhatsApp, te confirmamos el importe final con el ticket de balanza.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">4. Aclaraciones de corte o entrega (Opcional):</label>
+                    <textarea id="clientNote" placeholder="Ej: Los bifes cortados finos para milanesa, paso a las 19hs..." rows="2" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                </div>
+            </div>
+
+            <button onclick="sendToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center space-x-2 text-sm transition-all">
+                <i class="fa-brands fa-whatsapp text-lg"></i>
+                <span>Confirmar Compromiso y Enviar a WhatsApp</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwbW6YZv_UBrsUd-6CBzLH8l-KjPe4PxcvLGVU5vVtX-zYerZECIYx2Or6fjde4lOG7XYaNz3aT2GB/pub?output=csv";
+        
+        const STORE_ADDRESS = "Dr. Ortega Oeste 1340 (Entre Rivadavia y Magallanes)";
+        const STORE_PHONE = "5492644731947";
+
+        let deliveryMode = 'retiro';
+
+        let products = [
+            // Ofertas
+            { id: 12, categoria: "Ofertas", producto: "Asado Oferta", unidad: "kg", precio: 16800 },
+            { id: 11, categoria: "Ofertas", producto: "Asado Cerdo Oferta", unidad: "kg", precio: 6900 },
+            { id: 141, categoria: "Ofertas", producto: "5 Huevos Blancos x $1000", unidad: "promo", precio: 1000 },
+            { id: 143, categoria: "Ofertas", producto: "4 Huevos Castaños x $1000", unidad: "promo", precio: 1000 },
+
+            // Promos
+            { id: 115, categoria: "Promos", producto: "Aceite El Favorito 100% Girasol (Promo 2 unidades)", unidad: "promo", precio: 5000 },
+            { id: 89, categoria: "Promos", producto: "Botella Salsa El Gringo 1Lt (Promo 2 unidades)", unidad: "promo", precio: 3300 },
+            { id: 161, categoria: "Promos", producto: "Atado de Leña (Promo 3 unidades)", unidad: "promo", precio: 5000 },
+            { id: 1002, categoria: "Promos", producto: "Combo Asado (2kg Asado + 1 Atado Leña + Gaseosa 2.25L)", unidad: "combo", precio: 0 },
+
+            // Vacunos
+            { id: 1, categoria: "Vacunos", producto: "Molida Comun", unidad: "kg", precio: 8000 },
+            { id: 2, categoria: "Vacunos", producto: "Molida Especial", unidad: "kg", precio: 15000 },
+            { id: 3, categoria: "Vacunos", producto: "Blanda Paleta", unidad: "kg", precio: 14800 },
+            { id: 4, categoria: "Vacunos", producto: "Blanda Especial", unidad: "kg", precio: 16500 },
+            { id: 5, categoria: "Vacunos", producto: "Nalga Sin Tapa", unidad: "kg", precio: 17500 },
+            { id: 7, categoria: "Vacunos", producto: "Costeleta Novillo", unidad: "kg", precio: 13800 },
+            { id: 8, categoria: "Vacunos", producto: "Osobuco", unidad: "kg", precio: 8800 },
+            { id: 9, categoria: "Vacunos", producto: "Hueso Cogote", unidad: "kg", precio: 5000 },
+            { id: 13, categoria: "Vacunos", producto: "Costilla Novillo", unidad: "kg", precio: 14900 },
+            { id: 14, categoria: "Vacunos", producto: "Punta de Espalda", unidad: "kg", precio: 23000 },
+            { id: 15, categoria: "Vacunos", producto: "Hojal de Costilla", unidad: "kg", precio: 19500 },
+            { id: 16, categoria: "Vacunos", producto: "Marota", unidad: "kg", precio: 16000 },
+            { id: 17, categoria: "Vacunos", producto: "Matambre", unidad: "kg", precio: 14500 },
+
+            // Cerdo
+            { id: 6, categoria: "Cerdo", producto: "Hueso Cerdo", unidad: "kg", precio: 1000 },
+            { id: 18, categoria: "Cerdo", producto: "Blanda Cerdo", unidad: "kg", precio: 7500 },
+            { id: 19, categoria: "Cerdo", producto: "Chorizo y Morcilla", unidad: "kg", precio: 8000 },
+            { id: 1101, categoria: "Cerdo", producto: "Asado Cerdo Oferta", unidad: "kg", precio: 6900 },
+
+            // Pollo
+            { id: 20, categoria: "Pollo", producto: "Supremas", unidad: "kg", precio: 6500 },
+            { id: 21, categoria: "Pollo", producto: "Pollo", unidad: "kg", precio: 3800 },
+            { id: 22, categoria: "Pollo", producto: "Pata Muslo", unidad: "kg", precio: 3000 },
+            { id: 23, categoria: "Pollo", producto: "Pechuga", unidad: "kg", precio: 9300 },
+            { id: 24, categoria: "Pollo", producto: "Alitas", unidad: "kg", precio: 4200 },
+            { id: 10, categoria: "Pollo", producto: "Hueso Alita", unidad: "kg", precio: 1600 },
+
+            // Achuras
+            { id: 25, categoria: "Achuras", producto: "Higado", unidad: "kg", precio: 5500 },
+            { id: 26, categoria: "Achuras", producto: "Mondongo", unidad: "kg", precio: 9000 },
+            { id: 27, categoria: "Achuras", producto: "Lengua", unidad: "kg", precio: 11000 },
+            { id: 28, categoria: "Achuras", producto: "Chinchulines", unidad: "kg", precio: 5800 },
+            { id: 29, categoria: "Achuras", producto: "Riñon", unidad: "kg", precio: 4900 },
+            { id: 30, categoria: "Achuras", producto: "Corazon", unidad: "kg", precio: 6500 },
+
+            // Fiambres
+            { id: 31, categoria: "Fiambres", producto: "Queso Cremoso Punta del Agua", unidad: "100g", precio: 1000 },
+            { id: 32, categoria: "Fiambres", producto: "Queso Danbo Punta del Agua", unidad: "100g", precio: 1300 },
+            { id: 33, categoria: "Fiambres", producto: "Queso Reggianito Punta del Agua", unidad: "100g", precio: 2200 },
+            { id: 35, categoria: "Fiambres", producto: "Jamon Cocido Lario", unidad: "100g", precio: 1200 },
+            { id: 36, categoria: "Fiambres", producto: "Salame Lario", unidad: "100g", precio: 1600 },
+
+            // Frescos y Huevos
+            { id: 34, categoria: "Frescos", producto: "Queso Provoleta Nonna Pia (160g)", unidad: "paquete", precio: 6000 },
+            { id: 37, categoria: "Frescos", producto: "Salchicha La Casona (190g)", unidad: "paquete", precio: 1200 },
+            { id: 140, categoria: "Frescos", producto: "Huevos Blancos (Maple 30 u.)", unidad: "maple", precio: 5500 },
+            { id: 144, categoria: "Frescos", producto: "5 Huevos Blancos x $1000", unidad: "promo", precio: 1000 },
+            { id: 142, categoria: "Frescos", producto: "Huevos Castaños (Maple 30 u.)", unidad: "maple", precio: 6000 },
+            { id: 145, categoria: "Frescos", producto: "4 Huevos Castaños x $1000", unidad: "promo", precio: 1000 },
+
+            // Lácteos y Manteca
+            { id: 40, categoria: "Lacteos", producto: "Manteca Primer Premio (100g)", unidad: "paquete", precio: 1300 },
+            { id: 41, categoria: "Lacteos", producto: "Manteca Primer Premio (200g)", unidad: "paquete", precio: 2700 },
+            { id: 60, categoria: "Lacteos", producto: "Leche Liquida Descremada La Serenisima (1Lt)", unidad: "unidad", precio: 3000 },
+            { id: 61, categoria: "Lacteos", producto: "Leche Liquida Clasica La Serenisima (1Lt)", unidad: "unidad", precio: 3000 },
+            { id: 62, categoria: "Lacteos", producto: "Leche Liquida Los Apostoles (1Lt)", unidad: "unidad", precio: 2800 },
+
+            // Pastas
+            { id: 38, categoria: "Pastas", producto: "Ravioles La Italiana Pollo y Verduras (500g)", unidad: "paquete", precio: 3000 },
+            { id: 39, categoria: "Pastas", producto: "Ravioles La Italiana Pollo y Verduras (1kg)", unidad: "paquete", precio: 5200 },
+            { id: 120, categoria: "Pastas", producto: "Fideos Providencia Surtidos (500g)", unidad: "paquete", precio: 1200 },
+            { id: 121, categoria: "Pastas", producto: "Fideos Lucchetti Surtidos (500g)", unidad: "paquete", precio: 1400 },
+
+            // Aderezos y Salsas
+            { id: 88, categoria: "Aderezos", producto: "Botella Salsa El Gringo (1Lt)", unidad: "unidad", precio: 1800 },
+            { id: 99, categoria: "Aderezos", producto: "Botella Salsa El Gringo 1Lt (Promo 2 unidades)", unidad: "promo", precio: 3300 },
+            { id: 70, categoria: "Aderezos", producto: "Mayonesa Hellmanns (237g)", unidad: "unidad", precio: 2200 },
+            { id: 71, categoria: "Aderezos", producto: "Mayonesa Hellmanns (118g)", unidad: "unidad", precio: 1000 },
+            { id: 72, categoria: "Aderezos", producto: "Mayonesa Cada Dia (118g)", unidad: "unidad", precio: 600 },
+            { id: 73, categoria: "Aderezos", producto: "Mayonesa Cada Dia (237g)", unidad: "unidad", precio: 1200 },
+            { id: 74, categoria: "Aderezos", producto: "Mayonesa Natura (237g)", unidad: "unidad", precio: 1900 },
+            { id: 75, categoria: "Aderezos", producto: "Ketchup Hellmanns (250g)", unidad: "unidad", precio: 2800 },
+            { id: 76, categoria: "Aderezos", producto: "Ketchup Hellmanns (60g)", unidad: "unidad", precio: 1000 },
+            { id: 77, categoria: "Aderezos", producto: "Ketchup Natura (250g)", unidad: "unidad", precio: 2200 },
+            { id: 78, categoria: "Aderezos", producto: "Ketchup Fanacoa (250g)", unidad: "unidad", precio: 1500 },
+            { id: 79, categoria: "Aderezos", producto: "Mostaza Natura (250g)", unidad: "unidad", precio: 1400 },
+            { id: 80, categoria: "Aderezos", producto: "Mostaza Savora (60g)", unidad: "unidad", precio: 1000 },
+            { id: 81, categoria: "Aderezos", producto: "Salsa Golf Danica (209g)", unidad: "unidad", precio: 1800 },
+            { id: 82, categoria: "Aderezos", producto: "Salsa Golf Hellmanns (125g)", unidad: "unidad", precio: 2000 },
+            { id: 83, categoria: "Aderezos", producto: "Salsa Lista Arcor Pomarola", unidad: "paquete", precio: 1400 },
+            { id: 84, categoria: "Aderezos", producto: "Salsa Lista Arcor Tuco", unidad: "paquete", precio: 1500 },
+            { id: 85, categoria: "Aderezos", producto: "Salsa Lista Arcor Bolognesa", unidad: "paquete", precio: 1700 },
+            { id: 86, categoria: "Aderezos", producto: "Salsa Lista Noel Portuguesa", unidad: "paquete", precio: 1200 },
+            { id: 87, categoria: "Aderezos", producto: "Salsa Lista Noel Fileto", unidad: "paquete", precio: 1200 },
+            { id: 130, categoria: "Aderezos", producto: "Sal de Campo (5 pimientas / Ahumada / Original)", unidad: "unidad", precio: 4000 },
+            { id: 131, categoria: "Aderezos", producto: "Sobre Condimento Alicante Surtidos", unidad: "sobre", precio: 500 },
+
+            // Bebidas
+            { id: 50, categoria: "Bebidas", producto: "Fernet Branca (1Lt)", unidad: "unidad", precio: 18000 },
+            { id: 51, categoria: "Bebidas", producto: "Vino Tinto Fraternal (1Lt)", unidad: "unidad", precio: 1700 },
+            { id: 52, categoria: "Bebidas", producto: "Vino Blanco Resero (1Lt)", unidad: "unidad", precio: 1800 },
+            { id: 53, categoria: "Bebidas", producto: "Vino Colon Malbec (750ml)", unidad: "unidad", precio: 6800 },
+            { id: 54, categoria: "Bebidas", producto: "Gaseosa Linea 2.25 Litros", unidad: "unidad", precio: 0 },
+            { id: 55, categoria: "Bebidas", producto: "Gaseosa Linea 1.5 Litros", unidad: "unidad", precio: 0 },
+
+            // Almacén
+            { id: 114, categoria: "Almacen", producto: "Aceite El Favorito 100% Girasol", unidad: "unidad", precio: 2900 },
+            { id: 116, categoria: "Almacen", producto: "Aceite El Favorito 100% Girasol (Promo 2 unidades)", unidad: "promo", precio: 5000 },
+            { id: 90, categoria: "Almacen", producto: "Galletas Diversion (400g)", unidad: "paquete", precio: 3500 },
+            { id: 91, categoria: "Almacen", producto: "Bizcochos Don Satur Dulce (200g)", unidad: "paquete", precio: 1200 },
+            { id: 92, categoria: "Almacen", producto: "Bizcochos Don Satur Salado (200g)", unidad: "paquete", precio: 1200 },
+            { id: 93, categoria: "Almacen", producto: "Bizcochos Don Satur Negrito (200g)", unidad: "paquete", precio: 1200 },
+            { id: 94, categoria: "Almacen", producto: "Te Frutas Tropicales Virginia (20 saquitos)", unidad: "caja", precio: 2200 },
+            { id: 95, categoria: "Almacen", producto: "Te Durazno Virginia (20 saquitos)", unidad: "caja", precio: 2200 },
+            { id: 96, categoria: "Almacen", producto: "Te Rojo Virginia (20 saquitos)", unidad: "caja", precio: 2000 },
+            { id: 97, categoria: "Almacen", producto: "Te Manzanilla Virginia (20 saquitos)", unidad: "caja", precio: 1600 },
+            { id: 100, categoria: "Almacen", producto: "Pan Rallado (500g)", unidad: "paquete", precio: 1000 },
+            { id: 101, categoria: "Almacen", producto: "Levadura Levex Pizzas y Panes (2 sobres 10g)", unidad: "paquete", precio: 1200 },
+            { id: 102, categoria: "Almacen", producto: "Arvejas en Lata Inalpa (300g)", unidad: "lata", precio: 800 },
+            { id: 103, categoria: "Almacen", producto: "Picadillo de Carne Changuito (90g)", unidad: "lata", precio: 800 },
+            { id: 104, categoria: "Almacen", producto: "Arroz Carogran (500g)", unidad: "paquete", precio: 900 },
+            { id: 105, categoria: "Almacen", producto: "Arroz Tio Carlos (500g)", unidad: "paquete", precio: 1000 },
+            { id: 106, categoria: "Almacen", producto: "Polenta Legumpack (400g)", unidad: "paquete", precio: 900 },
+            { id: 107, categoria: "Almacen", producto: "Polenta Presto Pronto (490g)", unidad: "paquete", precio: 1700 },
+            { id: 108, categoria: "Almacen", producto: "Avena Morixe Tradicional (400g)", unidad: "paquete", precio: 1700 },
+            { id: 109, categoria: "Almacen", producto: "Maiz Pisado Blanco Marolio (400g)", unidad: "paquete", precio: 2300 },
+            { id: 110, categoria: "Almacen", producto: "Maicena La Original (500g)", unidad: "paquete", precio: 4500 },
+            { id: 111, categoria: "Almacen", producto: "Yerba Mate Probell (500g)", unidad: "paquete", precio: 1200 },
+            { id: 112, categoria: "Almacen", producto: "Yerba Mate Rosamonte (500g)", unidad: "paquete", precio: 2800 },
+            { id: 113, categoria: "Almacen", producto: "Yerba Mate Suave Rosamonte (500g)", unidad: "paquete", precio: 2800 },
+
+            // Limpieza
+            { id: 150, categoria: "Limpieza", producto: "Servilletas Cocina Sol Mayor (3 rollos)", unidad: "paquete", precio: 1300 },
+            { id: 151, categoria: "Limpieza", producto: "Papel Higienico Campanita (4 rollos)", unidad: "paquete", precio: 1300 },
+            { id: 152, categoria: "Limpieza", producto: "Shampoo Sedal Sobre (10ml)", unidad: "sobre", precio: 300 },
+            { id: 153, categoria: "Limpieza", producto: "Acondicionador Sedal Sobre (10ml)", unidad: "sobre", precio: 300 },
+            { id: 154, categoria: "Limpieza", producto: "Maquina Afeitar Gillette (2 hojas)", unidad: "unidad", precio: 1300 },
+
+            // Leña
+            { id: 160, categoria: "Leña", producto: "Atado de Leña", unidad: "unidad", precio: 2000 },
+            { id: 162, categoria: "Leña", producto: "Atado de Leña (Promo 3 unidades)", unidad: "promo", precio: 5000 }
+        ];
+
+        let cart = {};
+        let draftQty = {};
+        let itemSaleMode = {};
+        let currentFilter = 'todos';
+
+        const isGramsItem = p => (p.unidad || '').toLowerCase().trim() === '100g';
+        const isKgItem = p => (p.unidad || '').toLowerCase().trim() === 'kg';
+
+        // Determina de forma inteligente qué cortes permiten pedirse por "Bifes" o por "Unidades"
+        // (Excluye molida, asado, pechuga, pollo entero, huesos, achuras por kilo, etc.)
+        function getCustomUnitLabel(p) {
+            if (!isKgItem(p)) return null;
+            const name = p.producto.toLowerCase();
+            if (name.includes('blanda') || name.includes('nalga') || name.includes('costeleta')) {
+                return 'Bifes';
+            }
+            if (name.includes('suprema') || name.includes('pata muslo') || name.includes('pata muzlo') || name.includes('chorizo') || name.includes('osobuco') || name.includes('riñon')) {
+                return 'Unidades';
+            }
+            return null;
+        }
+
+        function getMode(p) {
+            if (isKgItem(p)) {
+                if (getCustomUnitLabel(p) && itemSaleMode[p.id] === 'unit') return 'unit';
+                return 'kg';
+            }
+            if (isGramsItem(p)) return 'grams';
+            return 'pack';
+        }
+
+        const stepOf = p => {
+            const mode = getMode(p);
+            if (mode === 'grams') return 100;
+            if (mode === 'kg') return 0.5;
+            return 1;
+        };
+
+        const fmt = n => Number.isInteger(n) ? String(n) : n.toFixed(1);
+        const money = n => '$' + Math.round(Number(n)).toLocaleString('es-AR');
+
+        function setDeliveryMode(mode) {
+            deliveryMode = mode;
+            const btnHeaderRetiro = document.getElementById('btnModeRetiro');
+            const btnHeaderDelivery = document.getElementById('btnModeDelivery');
+            const modalBtnRetiro = document.getElementById('modalBtnRetiro');
+            const modalBtnDelivery = document.getElementById('modalBtnDelivery');
+            const addressBox = document.getElementById('deliveryAddressBox');
+            const retiroInfo = document.getElementById('retiroInfoText');
+
+            if (mode === 'retiro') {
+                btnHeaderRetiro.className = "px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-red-600 text-white shadow";
+                btnHeaderDelivery.className = "px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-gray-300 hover:text-white";
+                modalBtnRetiro.className = "py-2.5 px-3 rounded-xl border border-red-600 bg-red-50 text-red-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all";
+                modalBtnDelivery.className = "py-2.5 px-3 rounded-xl border border-gray-200 bg-white text-gray-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-all";
+                addressBox.classList.add('hidden');
+                retiroInfo.classList.remove('hidden');
+            } else {
+                btnHeaderDelivery.className = "px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-red-600 text-white shadow";
+                btnHeaderRetiro.className = "px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-gray-300 hover:text-white";
+                modalBtnDelivery.className = "py-2.5 px-3 rounded-xl border border-red-600 bg-red-50 text-red-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all";
+                modalBtnRetiro.className = "py-2.5 px-3 rounded-xl border border-gray-200 bg-white text-gray-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-all";
+                addressBox.classList.remove('hidden');
+                retiroInfo.classList.add('hidden');
+            }
+        }
+
+        function togglePaymentInfo() {
+            const method = document.getElementById('paymentMethod').value;
+            const box = document.getElementById('mpCommitmentBox');
+            if (method.includes('Mercado Pago')) {
+                box.innerHTML = `<p class="font-bold"><i class="fa-solid fa-shield-halved mr-1"></i>Compromiso por Transferencia / Mercado Pago:</p><p>Una vez pesado tu pedido en balanza, te pasamos el monto exacto por WhatsApp para que transfieras y nos envíes el comprobante.</p>`;
+            } else {
+                box.innerHTML = `<p class="font-bold"><i class="fa-solid fa-handshake mr-1"></i>Compromiso de Pedido:</p><p>Tu pedido se prepara a medida en carnicería. Al enviarlo por WhatsApp confirmamos tu orden de inmediato.</p>`;
+            }
+        }
+
+        function toggleSaleMode(id, newMode) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            itemSaleMode[id] = newMode;
+            const defaultStep = newMode === 'kg' ? 0.5 : 2;
+            draftQty[id] = defaultStep;
+            if (cart[id] !== undefined) {
+                cart[id] = { qty: defaultStep, mode: newMode };
+                updateCartBar();
+            }
+            renderProducts(currentFilter, document.getElementById('searchInput').value);
+        }
+
+        function normalizeRow(item) {
+            let { id, categoria, producto, unidad, precio } = item;
+            const pLow = producto.toLowerCase();
+            const uLow = unidad.toLowerCase().trim();
+
+            if (pLow.includes('manteca')) categoria = 'Lacteos';
+            else if (pLow.includes('ravioles') || pLow.includes('fideos')) categoria = 'Pastas';
+            else if ((pLow.includes('salchicha') || pLow.includes('proveleta') || pLow.includes('provoleta') || categoria.toLowerCase() === 'fresco') && categoria.toLowerCase() !== 'ofertas') categoria = 'Frescos';
+            else if ((pLow.includes('mayonesa') || pLow.includes('ketchup') || pLow.includes('mostaza') || pLow.includes('salsa') || pLow.includes('sal de campo') || pLow.includes('alicante')) && categoria.toLowerCase() !== 'promos') categoria = 'Aderezos';
+
+            const isRealFiambre = categoria.toLowerCase() === 'fiambres' && uLow === '100g';
+            if (!isRealFiambre && uLow !== 'kg' && uLow !== 'unidad' && uLow !== 'paquete' && uLow !== 'caja' && uLow !== 'lata' && uLow !== 'sobre' && uLow !== 'maple' && uLow !== 'oferta' && uLow !== 'combo' && uLow !== 'promo') {
+                if (!producto.includes('(')) {
+                    producto = `${producto} (${unidad})`;
+                }
+                unidad = 'paquete';
+            }
+
+            return { id, categoria, producto, unidad, precio };
+        }
+
+        function parseCSV(text) {
+            const rows = []; let row = [], cur = '', q = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (q) { if (c === '"' && text[i+1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+                else if (c === '"') q = true;
+                else if (c === ',') { row.push(cur); cur = ''; }
+                else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+                else if (c !== '\r') cur += c;
+            }
+            if (cur || row.length) { row.push(cur); rows.push(row); }
+            return rows;
+        }
+
+        async function loadSheet() {
+            if (!SHEET_CSV_URL) return;
+            try {
+                const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const text = await res.text();
+                const rows = parseCSV(text);
+                if (!rows.length) return;
+
+                const head = rows.shift().map(h => h.replace(/^[\uFEFF\s]+|[\s]+$/g, '').toLowerCase());
+                const ix = k => head.indexOf(k);
+                
+                const seenIds = new Set();
+                const list = rows.filter(r => r[ix('producto')] && r[ix('producto')].trim() !== '').map((r, n) => {
+                    let rawPrice = r[ix('precio')] ? r[ix('precio')].toString().trim() : '0';
+                    let cleanPrice = parseFloat(rawPrice.replace(/[^0-9.,]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+                    
+                    let id = parseInt(r[ix('id')]) || (1000 + n);
+                    while (seenIds.has(id)) { id += 1000; }
+                    seenIds.add(id);
+
+                    return normalizeRow({
+                        id: id,
+                        categoria: (r[ix('categoria')] || '').trim(),
+                        producto: r[ix('producto')].trim(),
+                        unidad: (r[ix('unidad')] || 'unidad').trim(),
+                        precio: cleanPrice
+                    });
+                });
+
+                const hasMeatPrices = list.some(item => item.id === 1 && item.precio > 0);
+                if (list.length > 0 && hasMeatPrices) { 
+                    products = list; 
+                    renderProducts(currentFilter, document.getElementById('searchInput').value); 
+                    updateCartBar();
+                }
+            } catch (e) { 
+                console.warn('Usando lista actualizada integrada:', e); 
+            }
+        }
+
+        function calcSubtotal(prod, entry) {
+            if (!prod || prod.precio <= 0 || !entry) return 0;
+            if (entry.mode === 'unit') return 0;
+            if (entry.mode === 'grams') return (prod.precio / 100) * entry.qty;
+            return prod.precio * entry.qty;
+        }
+
+        function formatQtyLabel(prod, qty, mode) {
+            if (mode === 'grams') return `${qty}g`;
+            if (mode === 'kg') return `${fmt(qty)} kg`;
+            if (mode === 'unit') {
+                const label = getCustomUnitLabel(prod) === 'Bifes' ? (qty === 1 ? 'bife' : 'bifes') : 'unid.';
+                return `${qty} ${label}`;
+            }
+            return `${fmt(qty)}`;
+        }
+
+        function formatWhatsAppQty(prod, entry) {
+            const { qty, mode } = entry;
+            if (mode === 'grams') return `${qty}g`;
+            if (mode === 'kg') return `${fmt(qty)} kg`;
+            if (mode === 'unit') {
+                const unitType = getCustomUnitLabel(prod) === 'Bifes' ? (qty === 1 ? 'bife' : 'bifes') : (qty === 1 ? 'unidad' : 'unidades');
+                return `${qty} ${unitType} - A pesar en balanza (${money(prod.precio)}/kg)`;
+            }
+            const u = prod.unidad.toLowerCase();
+            if (qty === 1) return `1 ${u}`;
+            if (u === 'unidad') return `${qty} unidades`;
+            return `${qty} ${u}s`;
+        }
+
+        // Actualiza los colores de todos los botones de categoría evitando que queden blancos/transparentes en hover
+        function updateCategoryButtonsUI(activeCat) {
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                const cat = b.getAttribute('data-cat');
+                if (cat === activeCat) {
+                    if (cat === 'Ofertas') {
+                        b.className = "cat-btn text-xs font-bold px-3.5 py-2 rounded-full bg-red-600 text-white shadow-sm transition-all";
+                    } else if (cat === 'Promos') {
+                        b.className = "cat-btn text-xs font-bold px-3.5 py-2 rounded-full bg-amber-600 text-white shadow-sm transition-all";
+                    } else {
+                        b.className = "cat-btn text-xs font-bold px-3.5 py-2 rounded-full bg-zinc-900 text-white shadow-sm transition-all";
+                    }
+                } else {
+                    if (cat === 'Ofertas') {
+                        b.className = "cat-btn text-xs font-bold px-3.5 py-2 rounded-full bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all";
+                    } else if (cat === 'Promos') {
+                        b.className = "cat-btn text-xs font-bold px-3.5 py-2 rounded-full bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-all";
+                    } else {
+                        b.className = "cat-btn text-xs font-semibold px-3.5 py-2 rounded-full bg-white text-gray-700 border border-gray-200 hover:bg-gray-100 transition-all";
+                    }
+                }
+            });
+        }
+
+        function renderProducts(filter = 'todos', search = '') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            const cleanSearch = search.trim().toLowerCase();
+
+            // Si el usuario escribe en el buscador, busca de forma GENERAL en todas las categorías
+            const filtered = products.filter(p => {
+                if (cleanSearch !== '') {
+                    return p.producto.toLowerCase().includes(cleanSearch) || p.categoria.toLowerCase().includes(cleanSearch);
+                }
+                return filter === 'todos' || p.categoria.toLowerCase() === filter.toLowerCase();
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="sm:col-span-2 text-center py-12 text-gray-400 text-sm">No se encontraron productos para "${search}".</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const inCart = cart[p.id] !== undefined;
+                const mode = inCart ? cart[p.id].mode : getMode(p);
+                const defaultQty = stepOf(p);
+                const qty = inCart ? cart[p.id].qty : (draftQty[p.id] || defaultQty);
+                const priceText = p.precio > 0 ? money(p.precio) : 'Consultar';
+                
+                let badgeColor = "bg-gray-100 text-gray-600";
+                if(p.categoria === 'Ofertas') badgeColor = "bg-red-100 text-red-700 font-bold";
+                if(p.categoria === 'Promos') badgeColor = "bg-amber-100 text-amber-700 font-bold";
+
+                // Solo muestra el selector secundario si el corte realmente aplica para Bifes o Unidades
+                const customUnitLabel = getCustomUnitLabel(p);
+                const modeSwitchHTML = customUnitLabel ? `
+                    <div class="grid grid-cols-2 bg-gray-100 p-0.5 rounded-lg mb-2.5 text-[11px] font-bold">
+                        <button type="button" onclick="toggleSaleMode(${p.id}, 'kg')" 
+                            class="py-1 rounded-md transition-all ${mode === 'kg' ? 'bg-zinc-900 text-white shadow-sm' : 'text-gray-600 hover:text-zinc-900'}">
+                            Por Peso (Kg)
+                        </button>
+                        <button type="button" onclick="toggleSaleMode(${p.id}, 'unit')" 
+                            class="py-1 rounded-md transition-all ${mode === 'unit' ? 'bg-red-600 text-white shadow-sm' : 'text-gray-600 hover:text-zinc-900'}">
+                            Por ${customUnitLabel}
+                        </button>
+                    </div>
+                ` : '';
+
+                const selectorHTML = isGramsItem(p) ? `
+                    <div class="flex items-center space-x-1">
+                        <button onclick="updateQty(${p.id}, -1)" class="w-8 h-9 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-base flex items-center justify-center">-</button>
+                        <div class="relative flex items-center">
+                            <input type="number" step="50" min="50" value="${qty}" 
+                                onchange="setCustomGrams(${p.id}, this.value)"
+                                class="w-16 h-9 bg-gray-50 border border-gray-200 rounded-lg text-center font-bold text-xs pr-3 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                title="Escribí los gramos que quieras">
+                            <span class="absolute right-1.5 text-[10px] text-gray-400 font-bold pointer-events-none">g</span>
+                        </div>
+                        <button onclick="updateQty(${p.id}, 1)" class="w-8 h-9 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-base flex items-center justify-center">+</button>
+                    </div>
+                ` : `
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="updateQty(${p.id}, -1)" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-base flex items-center justify-center">-</button>
+                        <span id="qty-${p.id}" class="text-xs font-bold min-w-[3.4rem] px-1 text-center">${formatQtyLabel(p, qty, mode)}</span>
+                        <button onclick="updateQty(${p.id}, 1)" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-base flex items-center justify-center">+</button>
+                    </div>
+                `;
+
+                const card = document.createElement('div');
+                card.className = `bg-white p-4 rounded-2xl border ${inCart ? 'border-emerald-500 ring-1 ring-emerald-500' : 'border-gray-100'} shadow-sm flex flex-col justify-between hover:shadow-md transition-all`;
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${badgeColor} rounded-md">${p.categoria}</span>
+                            <span class="text-xs font-bold text-red-600">${priceText} <span class="text-[10px] text-gray-400 font-normal">/ ${p.unidad}</span></span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-sm mb-2 leading-snug">${p.producto}</h4>
+                        ${modeSwitchHTML}
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-50 gap-2">
+                        ${selectorHTML}
+                        <div class="flex items-center gap-1.5">
+                            ${inCart ? `
+                                <button onclick="removeFromCart(${p.id})" title="Quitar del pedido" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3 py-2.5 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                                <button onclick="addToCart(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2.5 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-check mr-1"></i> En pedido
+                                </button>
+                            ` : `
+                                <button onclick="addToCart(${p.id})" class="bg-zinc-900 hover:bg-red-600 text-white text-xs font-bold px-3 py-2.5 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-cart-plus mr-1"></i> Agregar
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setCustomGrams(id, val) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            let grams = parseInt(val, 10);
+            if (isNaN(grams) || grams <= 0) {
+                if (cart[id] !== undefined) removeFromCart(id);
+                return;
+            }
+            draftQty[id] = grams;
+            if (cart[id] !== undefined) {
+                cart[id] = { qty: grams, mode: 'grams' };
+                updateCartBar();
+            }
+            renderProducts(currentFilter, document.getElementById('searchInput').value);
+        }
+
+        function updateQty(id, delta) {
+            const p = products.find(x => x.id === id);
+            if(!p) return;
+            const mode = cart[id] !== undefined ? cart[id].mode : getMode(p);
+            const s = mode === 'grams' ? 100 : (mode === 'kg' ? 0.5 : 1);
+            
+            let current = cart[id] !== undefined ? cart[id].qty : (draftQty[id] || s);
+            current = Math.round((current + delta * s) * 10) / 10;
+
+            if (current <= 0) {
+                delete draftQty[id];
+                if (cart[id] !== undefined) removeFromCart(id);
+                return;
+            }
+
+            draftQty[id] = current;
+            if (cart[id] !== undefined) {
+                cart[id] = { qty: current, mode: mode };
+                updateCartBar();
+            }
+            renderProducts(currentFilter, document.getElementById('searchInput').value);
+        }
+
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            const mode = getMode(p);
+            const qty = draftQty[id] !== undefined ? draftQty[id] : (cart[id] !== undefined ? cart[id].qty : stepOf(p));
+            cart[id] = { qty, mode };
+            updateCartBar();
+            renderProducts(currentFilter, document.getElementById('searchInput').value);
+        }
+
+        function removeFromCart(id) {
+            delete cart[id];
+            delete draftQty[id];
+            updateCartBar();
+            renderProducts(currentFilter, document.getElementById('searchInput').value);
+            if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
+                renderCheckoutList();
+                if (Object.keys(cart).length === 0) closeCheckout();
+            }
+        }
+
+        function clearCart() {
+            cart = {};
+            draftQty = {};
+            updateCartBar();
+            renderProducts(currentFilter, document.getElementById('searchInput').value);
+            closeCheckout();
+        }
+
+        function getCartTotal() {
+            let total = 0;
+            for (let id in cart) {
+                const prod = products.find(p => p.id == parseInt(id));
+                if (prod) {
+                    total += calcSubtotal(prod, cart[id]);
+                }
+            }
+            return total;
+        }
+
+        function hasUnitWeighItems() {
+            for (let id in cart) {
+                if (cart[id].mode === 'unit' || cart[id].mode === 'kg') return true;
+            }
+            return false;
+        }
+
+        function updateCartBar() {
+            const totalItems = Object.keys(cart).length;
+            const cartBar = document.getElementById('cartBar');
+            document.getElementById('cartCount').innerText = totalItems;
+            const totalMoney = getCartTotal();
+            document.getElementById('cartTotalBar').innerText = totalMoney > 0 ? money(totalMoney) + ' (Est.)' : 'A pesar en balanza';
+
+            if (totalItems > 0) {
+                cartBar.classList.remove('translate-y-full');
+            } else {
+                cartBar.classList.add('translate-y-full');
+            }
+        }
+
+        function renderCheckoutList() {
+            const container = document.getElementById('cartItemsList');
+            container.innerHTML = '';
+            for (let id in cart) {
+                const prod = products.find(p => p.id == parseInt(id));
+                if (!prod) continue;
+                const entry = cart[id];
+                const subVal = calcSubtotal(prod, entry);
+                const sub = entry.mode === 'unit' ? `A pesar (${money(prod.precio)}/kg)` : (subVal > 0 ? money(subVal) : 'Consultar');
+                const qtyText = formatWhatsAppQty(prod, entry);
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "py-2.5 flex justify-between items-center gap-2 text-xs";
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-800">${prod.producto}</p>
+                        <p class="text-gray-500">${qtyText}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-gray-900 text-right">${sub}</span>
+                        <button onclick="removeFromCart(${prod.id})" title="Eliminar ítem" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 rounded-lg">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            }
+            const totalMoney = getCartTotal();
+            document.getElementById('modalTotal').innerText = totalMoney > 0 ? money(totalMoney) : 'A confirmar en balanza';
+            const warn = document.getElementById('weighableWarning');
+            if (hasUnitWeighItems()) warn.classList.remove('hidden');
+            else warn.classList.add('hidden');
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            // Si hace clic en una categoría y había texto en el buscador, limpiamos el buscador para mostrar esa sección
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput.value.trim() !== '') {
+                searchInput.value = '';
+                document.getElementById('clearSearchBtn').classList.add('hidden');
+            }
+            updateCategoryButtonsUI(currentFilter);
+            renderProducts(currentFilter, '');
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            updateCategoryButtonsUI(currentFilter);
+            renderProducts(currentFilter, '');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const val = e.target.value;
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (val.trim() !== '') {
+                clearBtn.classList.remove('hidden');
+                // Resalta "Todos" visualmente mientras busca en todo el catálogo
+                updateCategoryButtonsUI('todos');
+            } else {
+                clearBtn.classList.add('hidden');
+                updateCategoryButtonsUI(currentFilter);
+            }
+            renderProducts(currentFilter, val);
+        });
+
+        function openCheckout() {
+            setDeliveryMode(deliveryMode);
+            renderCheckoutList();
+            document.getElementById('checkoutModal').classList.remove('hidden');
+            document.getElementById('checkoutModal').classList.add('flex');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').classList.remove('flex');
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        function sendToWhatsApp() {
+            const name = document.getElementById('clientName').value.trim();
+            const address = document.getElementById('clientAddress').value.trim();
+            const payment = document.getElementById('paymentMethod').value;
+            const note = document.getElementById('clientNote').value.trim();
+            
+            if(!name) {
+                alert('Por favor ingresá tu nombre y apellido para confirmar el pedido.');
+                return;
+            }
+            if(deliveryMode === 'delivery' && !address) {
+                alert('Por favor ingresá tu dirección exacta para poder enviar el Delivery.');
+                return;
+            }
+
+            let message = `*Nuevo Pedido Web - Carnes Guerra*\n\n`;
+            message += `*Cliente:* ${name}\n`;
+            if (deliveryMode === 'delivery') {
+                message += `*Modalidad:* Envío a Domicilio (Delivery)\n`;
+                message += `*Dirección:* ${address}\n`;
+            } else {
+                message += `*Modalidad:* Retiro en Local (${STORE_ADDRESS})\n`;
+            }
+            message += `*Medio de Pago:* ${payment}\n`;
+            if(note) message += `*Aclaración:* ${note}\n`;
+            message += `----------------------------------\n`;
+
+            let totalEst = 0;
+            let hasUnitItems = false;
+
+            for(let id in cart) {
+                const prod = products.find(p => p.id == parseInt(id));
+                if(!prod) continue;
+                const entry = cart[id];
+                const subtotal = calcSubtotal(prod, entry);
+                totalEst += subtotal;
+                if (entry.mode === 'unit') hasUnitItems = true;
+
+                const displayQtyText = formatWhatsAppQty(prod, entry);
+
+                if (entry.mode === 'unit') {
+                    message += `- *${prod.producto}* (${displayQtyText})\n`;
+                } else if (subtotal > 0) {
+                    message += `- *${prod.producto}* (${displayQtyText}) - ${money(subtotal)}\n`;
+                } else {
+                    message += `- *${prod.producto}* (${displayQtyText})\n`;
+                }
+            }
+
+            message += `----------------------------------\n`;
+            if(totalEst > 0) {
+                message += `*Total Estimado:* ${money(totalEst)}${hasUnitItems ? ' + cortes a pesar en balanza' : ' (Sujeto a pesaje exacto en balanza)'}\n`;
+            } else {
+                message += `*Total:* A confirmar según ticket de balanza\n`;
+            }
+            message += `\n_Aguardo el ticket de balanza para confirmar el importe final._`;
+
+            const url = `https://wa.me/${STORE_PHONE}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        updateCategoryButtonsUI('todos');
+        renderProducts();
+        loadSheet();
+    </script>
+</body>
+</html>
